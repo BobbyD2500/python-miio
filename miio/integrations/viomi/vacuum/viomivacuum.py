@@ -44,6 +44,7 @@ Misc:
 import itertools
 import logging
 import time
+import json
 from collections import defaultdict
 from datetime import timedelta
 from enum import Enum
@@ -609,7 +610,7 @@ class ViomiVacuum(Device):
             model=model,
         )
         self.manual_seqnum = -1
-        self._cache: Dict[str, Any] = {"edge_state": None, "rooms": {}, "maps": {}}
+        self._cache: Dict[str, Any] = {"edge_state": None, "rooms": {}, "maps": []}
 
     @command()
     def status(self) -> ViomiVacuumStatus:
@@ -940,7 +941,7 @@ class ViomiVacuum(Device):
           ...]
         """
         if not self._cache["maps"]:
-            self._cache["maps"] = self.send("get_map")
+            self._cache["maps"] = json.loads(self.send("get_map")['out'][0]['value'])
         return self._cache["maps"]
 
     @command(click.argument("map_id", type=int))
